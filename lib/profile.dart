@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/main.dart';
 import 'package:todo/login_format.dart';
@@ -11,16 +10,20 @@ class Profile extends StatelessWidget {
     User user = Home.user!;
 
     var theme = Theme.of(context);
-    var txtStyle = theme.textTheme.headlineMedium!
+    var textStyle = theme.textTheme.headlineMedium!
         .copyWith(fontFamily: 'Raleway', color: theme.primaryColorLight);
+    var buttonTextStyle =
+        theme.textTheme.bodyLarge!.copyWith(color: theme.primaryColorLight);
+
     var isEnabled = true;
 
     return Scaffold(
         body: NestedScrollView(
+            physics: BouncingScrollPhysics(),
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
-                  expandedHeight: 200,
+                  expandedHeight: 250,
                   floating: true,
                   pinned: true,
                   backgroundColor: theme.canvasColor,
@@ -33,7 +36,7 @@ class Profile extends StatelessWidget {
                           child: FlexibleSpaceBar(
                             centerTitle: false,
                             title:
-                                Text("Hello, ${user.fname}", style: txtStyle),
+                                Text("Hello, ${user.fname}", style: textStyle),
                             titlePadding: const EdgeInsets.all(20),
                           )),
                       const Spacer(),
@@ -55,27 +58,43 @@ class Profile extends StatelessWidget {
               ];
             },
             body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      createTextField(context, "First Name", user.fname, "",
-                          (value) => null, isEnabled, 170),
-                      createTextField(context, "Last Name", user.lname, "",
-                          (value) => null, isEnabled, 170)
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  createTextField(context, "Email", user.email, "",
-                      (value) => null, isEnabled),
-                  SizedBox(height: 20),
-                  createTextField(context, "Password", user.password, "",
-                      (value) => null, isEnabled),
-                ],
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.only(top: 15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        createTextField(context, "First Name", user.fname, "",
+                            (value) => null, isEnabled, 170),
+                        createTextField(context, "Last Name", user.lname, "",
+                            (value) => null, isEnabled, 170)
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    createTextField(context, "Email", user.email, "",
+                        (value) => null, isEnabled),
+                    const SizedBox(height: 20),
+                    createTextField(context, "Password", user.password, "",
+                        (value) => null, isEnabled),
+                    const SizedBox(height: 40),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.focusColor,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        fixedSize: const Size(300, 50),
+                      ),
+                      child: Text("Save changes", style: buttonTextStyle),
+                    ),
+                  ],
+                ),
               ),
             )));
   }
