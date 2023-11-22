@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:todo/login.dart';
 import 'package:todo/task_format.dart';
 import 'package:todo/login_format.dart';
+import 'package:todo/profile.dart';
 
 void main() {
   runApp(const MyApp());
@@ -105,6 +106,8 @@ class _HomeState extends State<Home> {
                   expandedHeight: 200,
                   floating: true,
                   pinned: true,
+                  backgroundColor: theme.canvasColor,
+                  toolbarHeight: 100.0,
                   flexibleSpace: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -125,7 +128,13 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.only(top: 20, bottom: 20),
                         child: IconButton(
                             iconSize: 40,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Profile()),
+                                  (route) => false);
+                            },
                             icon: const Icon(
                               Icons.person,
                               color: Colors.white,
@@ -133,8 +142,6 @@ class _HomeState extends State<Home> {
                       )
                     ],
                   ),
-                  backgroundColor: theme.canvasColor,
-                  toolbarHeight: 100.0,
                 )
               ];
             },
