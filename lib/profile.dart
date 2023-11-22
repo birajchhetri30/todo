@@ -19,7 +19,6 @@ class Profile extends StatelessWidget {
 
     return Scaffold(
         body: NestedScrollView(
-            physics: BouncingScrollPhysics(),
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
