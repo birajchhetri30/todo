@@ -91,6 +91,14 @@ class TaskDatabase {
     }
   }
 
+  void deleteAllCompleted() async {
+    final db = await database;
+    db.delete(
+      taskTable,
+      where: '${TaskFields.status} = TRUE'
+    );
+  }
+
   Future close() async {
     final db = await database;
     db.close();
