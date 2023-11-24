@@ -79,8 +79,7 @@ class Login extends StatelessWidget {
                   Home.user = user!;
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const Home()),
+                      MaterialPageRoute(builder: (context) => const Home()),
                       (route) => false);
                 }
               },
@@ -184,8 +183,7 @@ class SignUp extends StatelessWidget {
                     Home.user = user!;
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const Home()),
+                        MaterialPageRoute(builder: (context) => const Home()),
                         (route) => false);
                   }
                 },
