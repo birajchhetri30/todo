@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
 import 'package:todo/login.dart';
 import 'package:todo/task_format.dart';
@@ -7,7 +8,11 @@ import 'package:todo/login_format.dart';
 import 'package:todo/profile.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    Phoenix(
+      child: const MyApp()
+      )
+    );
 }
 
 class MyApp extends StatelessWidget {
@@ -129,11 +134,10 @@ class _HomeState extends State<Home> {
                         child: IconButton(
                             iconSize: 40,
                             onPressed: () {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const Profile()),
-                                  (route) => false);
+                                      builder: (context) => const Profile()));
                             },
                             icon: const Icon(
                               Icons.person,
