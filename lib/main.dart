@@ -55,7 +55,7 @@ class MyAppState extends ChangeNotifier {
     var t1 = Task(status: false, task: task);
     var newTask = await user.userTasks.create(t1);
     remaining = await user.userTasks.getRecordCount();
-    debugPrint("Remaining: $remaining");
+
     todoList.add(newTask);
 
     notifyListeners();
@@ -67,13 +67,19 @@ class MyAppState extends ChangeNotifier {
 
   void changeStatus(Task task, bool value) async {
     task = Task(index: task.index, status: value, task: task.task);
-    debugPrint("Change status of: ${task.task}");
+
     await user.userTasks.update(task);
 
     remaining = await user.userTasks.getRecordCount();
-    debugPrint("Remaining: $remaining");
     todoList = await user.userTasks.readAllTasks();
     //todoList[task.index] = (index: task.index, status: value, task: task.task);
+    notifyListeners();
+  }
+
+  void deleteAllCompleted() async {
+    user.userTasks.deleteAllCompleted();
+    todoList = await user.userTasks.readAllTasks();
+
     notifyListeners();
   }
 }
@@ -255,14 +261,29 @@ class Completed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    var theme = Theme.of(context);
 
-    return ListView(
-        padding: const EdgeInsets.all(10),
-        physics: const BouncingScrollPhysics(),
-        children: [
-          for (var task in appState.todoList)
-            if (task.status) const ToDoPage().createCard(task, context)
-        ]);
+    return Stack(children: [
+      ListView(
+          padding: const EdgeInsets.all(10),
+          physics: const BouncingScrollPhysics(),
+          children: [
+            for (var task in appState.todoList)
+              if (task.status) const ToDoPage().createCard(task, context)
+          ]),
+      Align(
+        alignment: Alignment.bottomRight,
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: FloatingActionButton(
+              backgroundColor: theme.colorScheme.error,
+              onPressed: () {
+                appState.deleteAllCompleted();
+              },
+              child: Icon(Icons.delete, color: theme.colorScheme.onError)),
+        ),
+      )
+    ]);
   }
 }
 
