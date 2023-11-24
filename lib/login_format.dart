@@ -8,14 +8,15 @@ class User {
   final String password;
   late TaskDatabase userTasks;
 
-  User(
-      {this.id,
-      required this.fname,
-      required this.lname,
-      required this.email,
-      required this.password}) {
-        userTasks = TaskDatabase(id.toString());
-      }
+  User({
+    this.id,
+    required this.fname,
+    required this.lname,
+    required this.email,
+    required this.password,
+  }) {
+    userTasks = TaskDatabase(id.toString());
+  }
 
   Map<String, Object?> toJson() {
     return {
@@ -29,25 +30,28 @@ class User {
 
   static User fromJson(Map<String, Object?> json) {
     return User(
-        id: json[UserFields.id] as int,
-        fname: json[UserFields.fname] as String,
-        lname: json[UserFields.lname] as String,
-        email: json[UserFields.email] as String,
-        password: json[UserFields.password] as String);
+      id: json[UserFields.id] as int,
+      fname: json[UserFields.fname] as String,
+      lname: json[UserFields.lname] as String,
+      email: json[UserFields.email] as String,
+      password: json[UserFields.password] as String,
+    );
   }
 
-  User copy(
-      {int? id,
-      String? fname,
-      String? lname,
-      String? email,
-      String? password}) {
+  User copy({
+    int? id,
+    String? fname,
+    String? lname,
+    String? email,
+    String? password,
+  }) {
     return User(
-        id: this.id,
-        fname: this.fname,
-        lname: this.lname,
-        email: this.email,
-        password: this.password);
+      id: this.id,
+      fname: this.fname,
+      lname: this.lname,
+      email: this.email,
+      password: this.password,
+    );
   }
 }
 
