@@ -8,11 +8,7 @@ import 'package:todo/login_format.dart';
 import 'package:todo/profile.dart';
 
 void main() {
-  runApp(
-    Phoenix(
-      child: const MyApp()
-      )
-    );
+  runApp(Phoenix(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -51,13 +47,15 @@ class MyAppState extends ChangeNotifier {
   void onStart() async {
     todoList = await user.userTasks.readAllTasks();
     remaining = await user.userTasks.getRecordCount();
+    debugPrint("Remaining: $remaining");
     notifyListeners();
   }
 
   void add(String task) async {
     var t1 = Task(status: false, task: task);
     var newTask = await user.userTasks.create(t1);
-    remaining++;
+    remaining = await user.userTasks.getRecordCount();
+    debugPrint("Remaining: $remaining");
     todoList.add(newTask);
 
     notifyListeners();
@@ -69,13 +67,11 @@ class MyAppState extends ChangeNotifier {
 
   void changeStatus(Task task, bool value) async {
     task = Task(index: task.index, status: value, task: task.task);
-    user.userTasks.update(task);
-    if (value) {
-      remaining--;
-    } else {
-      remaining++;
-    }
+    debugPrint("Change status of: ${task.task}");
+    await user.userTasks.update(task);
 
+    remaining = await user.userTasks.getRecordCount();
+    debugPrint("Remaining: $remaining");
     todoList = await user.userTasks.readAllTasks();
     //todoList[task.index] = (index: task.index, status: value, task: task.task);
     notifyListeners();
@@ -241,7 +237,7 @@ class ToDoPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5)),
                     value: appState.getStatus((task)),
-                    onChanged: (bool? value) {
+                    onChanged: (value) {
                       appState.changeStatus(task, value!);
                     },
                     checkColor: Colors.white,
