@@ -61,6 +61,20 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void edit(String oldTask, String newTask) async {
+    for (Task each in todoList) {
+      if (each.task == oldTask) {
+        debugPrint("Edited ${each.task} to $newTask");
+        Task updatedTask =
+            Task(index: each.index, status: false, task: newTask);
+        await user.userTasks.update(updatedTask);
+        break;
+      }
+    }
+    todoList = await user.userTasks.readAllTasks();
+    notifyListeners();
+  }
+
   bool getStatus(Task task) {
     return task.status;
   }
@@ -72,12 +86,11 @@ class MyAppState extends ChangeNotifier {
 
     remaining = await user.userTasks.getRecordCount();
     todoList = await user.userTasks.readAllTasks();
-    //todoList[task.index] = (index: task.index, status: value, task: task.task);
     notifyListeners();
   }
 
   void deleteAllCompleted() async {
-    user.userTasks.deleteAllCompleted();
+    await user.userTasks.deleteAllCompleted();
     todoList = await user.userTasks.readAllTasks();
 
     notifyListeners();
@@ -209,49 +222,13 @@ class ToDoPage extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             children: [
               for (var task in appState.todoList)
-                if (!task.status) createCard(task, context)
+                if (!task.status)
+                  ResuableWidgets().createCard(task, context, true)
             ],
           ),
         ),
       ],
     );
-  }
-
-  Widget createCard(Task task, BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var theme = Theme.of(context);
-    var cardStyle = theme.cardColor;
-    var txtStyle = theme.textTheme.bodyLarge!
-        .copyWith(fontFamily: 'Raleway', color: theme.colorScheme.onBackground);
-
-    return Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: cardStyle,
-        elevation: 5.0,
-        margin: const EdgeInsets.all(10.0),
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Stack(children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 40),
-              child: Text(task.task, style: txtStyle),
-            ),
-            Stack(children: [
-              Align(
-                  alignment: Alignment.centerRight,
-                  child: Checkbox(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    value: appState.getStatus((task)),
-                    onChanged: (value) {
-                      appState.changeStatus(task, value!);
-                    },
-                    checkColor: Colors.white,
-                    activeColor: theme.focusColor,
-                  )),
-            ])
-          ]),
-        ));
   }
 }
 
@@ -269,7 +246,8 @@ class Completed extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           children: [
             for (var task in appState.todoList)
-              if (task.status) const ToDoPage().createCard(task, context)
+              if (task.status)
+                ResuableWidgets().createCard(task, context, false)
           ]),
       Align(
         alignment: Alignment.bottomRight,
@@ -292,80 +270,157 @@ class AddTodo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String task = "";
     var theme = Theme.of(context);
-    var appState = context.watch<MyAppState>();
 
-    var txtStyle =
-        theme.textTheme.bodyLarge!.copyWith(color: theme.primaryColorLight);
     return IconButton(
       icon: const Icon(Icons.add),
       iconSize: 40,
       color: theme.primaryColorLight,
       onPressed: () => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => Dialog(
-            backgroundColor: theme.cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(children: [
-                    Center(
-                      heightFactor: 2,
-                      child: Text(
-                        "Create ToDo",
-                        style: txtStyle,
-                      ),
-                    ),
-                    Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                          icon: Icon(Icons.close,
-                              size: 20, color: theme.primaryColorLight),
-                          onPressed: () => Navigator.pop(context),
-                        ))
-                  ]),
-                  TextField(
-                      style: TextStyle(color: theme.primaryColorLight),
-                      cursorColor: theme.focusColor,
-                      textCapitalization: TextCapitalization.sentences,
-                      contextMenuBuilder: contextMenu,
-                      maxLines: null,
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          appState.add(value);
-                          Navigator.pop(context);
-                        }
-                      },
-                      onChanged: (value) {
-                        task = value;
-                      },
-                      decoration: InputDecoration(
-                        isDense: false,
-                        hintText: "Example: Start Flutter app",
-                        hintStyle: TextStyle(color: theme.primaryColor),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: theme.focusColor)),
-                      )),
-                  const SizedBox(height: 15),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.focusColor,
-                      ),
-                      onPressed: () {
-                        if (task.isNotEmpty) {
-                          appState.add(task);
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text("Add"))
-                ],
-              ),
-            )),
-      ),
+          context: context,
+          builder: (BuildContext context) {
+            return ResuableWidgets().createDialog(context,
+                cardTitle: "Create ToDo",
+                buttonText: "Add",
+                task: "",
+                onPressed: "OnCreate");
+          }),
     );
+  }
+}
+
+class ResuableWidgets {
+  Widget createCard(Task task, BuildContext context, bool editable) {
+    var appState = context.watch<MyAppState>();
+    var theme = Theme.of(context);
+    var cardStyle = theme.cardColor;
+    var txtStyle = theme.textTheme.bodyLarge!
+        .copyWith(fontFamily: 'Raleway', color: theme.colorScheme.onBackground);
+
+    return GestureDetector(
+      onTap: () {
+        if (editable) {
+          showDialog<String>(
+              context: context,
+              builder: (BuildContext context) {
+                return createDialog(context,
+                    cardTitle: "Edit ToDo",
+                    buttonText: "Done",
+                    initialValue: task.task,
+                    task: task.task,
+                    onPressed: "OnEdit");
+              });
+        }
+      },
+      child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          color: cardStyle,
+          elevation: 5.0,
+          margin: const EdgeInsets.all(10.0),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Stack(children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 40),
+                child: Text(task.task, style: txtStyle),
+              ),
+              Stack(children: [
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: Checkbox(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5)),
+                      value: appState.getStatus((task)),
+                      onChanged: (value) {
+                        appState.changeStatus(task, value!);
+                      },
+                      checkColor: Colors.white,
+                      activeColor: theme.focusColor,
+                    )),
+              ])
+            ]),
+          )),
+    );
+  }
+
+  Widget createDialog(
+    BuildContext context, {
+    required String cardTitle,
+    required String buttonText,
+    String? initialValue,
+    String task = "",
+    required String onPressed,
+  }) {
+    //var appState = context.watch<MyAppState>();
+    var appState = Provider.of<MyAppState>(context, listen: false);
+    var theme = Theme.of(context);
+    var txtStyle =
+        theme.textTheme.bodyLarge!.copyWith(color: theme.primaryColorLight);
+
+    return Dialog(
+        backgroundColor: theme.cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(children: [
+                Center(
+                  heightFactor: 2,
+                  child: Text(
+                    cardTitle,
+                    style: txtStyle,
+                  ),
+                ),
+                Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: Icon(Icons.close,
+                          size: 20, color: theme.primaryColorLight),
+                      onPressed: () => Navigator.pop(context),
+                    ))
+              ]),
+              TextFormField(
+                  initialValue: initialValue,
+                  style: TextStyle(color: theme.primaryColorLight),
+                  cursorColor: theme.focusColor,
+                  textCapitalization: TextCapitalization.sentences,
+                  contextMenuBuilder: contextMenu,
+                  maxLines: null,
+                  onChanged: (value) {
+                    task = value;
+                  },
+                  decoration: InputDecoration(
+                    isDense: false,
+                    hintText: (initialValue == null)
+                        ? "Example: Start Flutter app"
+                        : null,
+                    hintStyle: TextStyle(color: theme.primaryColor),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: theme.focusColor)),
+                  )),
+              const SizedBox(height: 15),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.focusColor,
+                  ),
+                  onPressed: () {
+                    if (onPressed == "OnCreate") {
+                      if (task.isNotEmpty) {
+                        appState.add(task);
+                      }
+                    } else if (onPressed == "OnEdit") {
+                      if (task.isNotEmpty) {
+                        appState.edit(initialValue!, task);
+                      }
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text(buttonText))
+            ],
+          ),
+        ));
   }
 
   Widget contextMenu(
