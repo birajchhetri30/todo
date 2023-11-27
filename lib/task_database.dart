@@ -91,12 +91,14 @@ class TaskDatabase {
     }
   }
 
-  void deleteAllCompleted() async {
+  Future<void> deleteAllCompleted() async {
     final db = await database;
-    db.delete(
-      taskTable,
-      where: '${TaskFields.status} = TRUE'
-    );
+    db.delete(taskTable, where: '${TaskFields.status} = TRUE');
+  }
+
+  Future<void> deleteAllTasks() async {
+    final db = await database;
+    await databaseFactory.deleteDatabase(db.path);
   }
 
   Future close() async {

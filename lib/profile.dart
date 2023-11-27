@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo/main.dart';
 import 'package:todo/login_format.dart';
-import 'package:todo/login.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 class Profile extends StatelessWidget {
@@ -128,13 +127,8 @@ class Profile extends StatelessWidget {
                                     mainButtonColor: theme.colorScheme.error,
                                     mainButtonText: "Delete",
                                     mainButtonOnPressed: () {
-                                      //user.delete();
-                                      Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const Login()),
-                                          (route) => false);
+                                      user.deleteUser();
+                                      Phoenix.rebirth(context);
                                     });
                               });
                         },

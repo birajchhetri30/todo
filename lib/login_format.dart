@@ -1,4 +1,5 @@
 import 'package:todo/task_database.dart';
+import 'package:todo/user_database.dart';
 
 class User {
   final int? id;
@@ -52,6 +53,11 @@ class User {
       email: this.email,
       password: this.password,
     );
+  }
+
+  void deleteUser() async {
+    await userTasks.deleteAllTasks();
+    await UserDatabase.instance.deleteUser(id!);
   }
 }
 

@@ -104,6 +104,11 @@ class UserDatabase {
     return id;
   }
 
+  Future<void> deleteUser(int id) async {
+    final db = await instance.database;
+    db.delete(userTable, where: '${UserFields.id} = ?', whereArgs: [id]);
+  }
+
   Future close() async {
     final db = await instance.database;
     db.close();
