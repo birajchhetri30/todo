@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/main.dart';
 import 'package:todo/login_format.dart';
@@ -97,7 +98,7 @@ class Profile extends StatelessWidget {
                         changed = true;
                       }
                     }, isEnabled),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     createTextField(context, "Last Name", user.lname, "",
                         (value) {
                       newLname = value;
