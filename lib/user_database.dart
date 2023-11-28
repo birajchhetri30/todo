@@ -98,6 +98,22 @@ class UserDatabase {
 
   Future<int> update(User user) async {
     final db = await instance.database;
+
+    int id = await db.update(userTable, user.toJson(),
+        where: '${UserFields.id} = ?', whereArgs: [user.id]);
+
+    return id;
+  }
+
+  Future<int> conditionalUpdate(User user) async {
+    //this function is used if email is changed, to check if the new email already exists
+    final db = await instance.database;
+    
+    bool exists = await checkUserExists(user.email);
+    if (exists) {
+      return -1;
+    }
+
     int id = await db.update(userTable, user.toJson(),
         where: '${UserFields.id} = ?', whereArgs: [user.id]);
 
