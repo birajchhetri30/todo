@@ -99,6 +99,7 @@ class MyAppState extends ChangeNotifier {
   void deleteTask(Task task) async {
     await user.userTasks.deleteTask(task);
     todoList = await user.userTasks.readAllTasks();
+    remaining = await user.userTasks.getRecordCount();
 
     notifyListeners();
   }
@@ -329,9 +330,12 @@ class ResuableWidgets {
         child: Container(
           constraints: const BoxConstraints(minHeight: 110),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Text(task.task, style: txtStyle),
+            SizedBox(
+              width: 320,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Text(task.task, style: txtStyle),
+              ),
             ),
             const Spacer(),
             Column(
