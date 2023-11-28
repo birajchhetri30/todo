@@ -90,25 +90,21 @@ class Profile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        createTextField(context, "First Name", user.fname, "",
-                            (value) {
-                          newFname = value;
-                          if (newFname != Home.user?.fname) {
-                            changed = true;
-                          }
-                        }, isEnabled, 170),
-                        createTextField(context, "Last Name", user.lname, "",
-                            (value) {
-                          newLname = value;
-                          if (newLname != Home.user?.lname) {
-                            changed = true;
-                          }
-                        }, isEnabled, 170)
-                      ],
-                    ),
+                    createTextField(context, "First Name", user.fname, "",
+                        (value) {
+                      newFname = value;
+                      if (newFname != Home.user?.fname) {
+                        changed = true;
+                      }
+                    }, isEnabled),
+                    SizedBox(height: 20),
+                    createTextField(context, "Last Name", user.lname, "",
+                        (value) {
+                      newLname = value;
+                      if (newLname != Home.user?.lname) {
+                        changed = true;
+                      }
+                    }, isEnabled),
                     const SizedBox(height: 20),
                     createTextField(context, "Email", user.email, "", (value) {
                       newEmail = value;
@@ -166,7 +162,7 @@ class Profile extends StatelessWidget {
                       ),
                       child: Text("Save changes", style: buttonTextStyle),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 25),
                     ElevatedButton(
                         onPressed: () {
                           showDialog<void>(
