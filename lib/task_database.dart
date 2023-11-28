@@ -101,6 +101,12 @@ class TaskDatabase {
     await databaseFactory.deleteDatabase(db.path);
   }
 
+  Future<void> deleteTask(Task task) async {
+    final db = await database;
+    await db.delete(taskTable,
+        where: '${TaskFields.index} = ?', whereArgs: [task.index]);
+  }
+
   Future close() async {
     final db = await database;
     db.close();

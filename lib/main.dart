@@ -95,6 +95,13 @@ class MyAppState extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void deleteTask(Task task) async {
+    await user.userTasks.deleteTask(task);
+    todoList = await user.userTasks.readAllTasks();
+
+    notifyListeners();
+  }
 }
 
 class Home extends StatefulWidget {
@@ -148,6 +155,7 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.only(top: 20, bottom: 20),
                         child: IconButton(
                             iconSize: 40,
+                            splashRadius: 25,
                             onPressed: () {
                               Navigator.push(
                                   context,
@@ -274,6 +282,7 @@ class AddTodo extends StatelessWidget {
 
     return IconButton(
       icon: const Icon(Icons.add),
+      splashRadius: 25,
       iconSize: 40,
       color: theme.primaryColorLight,
       onPressed: () => showDialog<String>(
@@ -313,34 +322,46 @@ class ResuableWidgets {
         }
       },
       child: Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          color: cardStyle,
-          elevation: 5.0,
-          margin: const EdgeInsets.all(10.0),
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 40),
-                child: Text(task.task, style: txtStyle),
-              ),
-              Stack(children: [
-                Align(
-                    alignment: Alignment.centerRight,
-                    child: Checkbox(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5)),
-                      value: appState.getStatus((task)),
-                      onChanged: (value) {
-                        appState.changeStatus(task, value!);
-                      },
-                      checkColor: Colors.white,
-                      activeColor: theme.focusColor,
-                    )),
-              ])
-            ]),
-          )),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        color: cardStyle,
+        elevation: 5.0,
+        margin: const EdgeInsets.all(10.0),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 110),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(task.task, style: txtStyle),
+            ),
+            const Spacer(),
+            Column(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    appState.deleteTask(task);
+                  },
+                  splashRadius: 15,
+                  icon: Icon(
+                    Icons.close,
+                    color: theme.primaryColor,
+                  ),
+                  iconSize: 20,
+                ),
+                Checkbox(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  value: appState.getStatus((task)),
+                  onChanged: (value) {
+                    appState.changeStatus(task, value!);
+                  },
+                  checkColor: Colors.white,
+                  activeColor: theme.focusColor,
+                )
+              ],
+            ),
+          ]),
+        ),
+      ),
     );
   }
 
