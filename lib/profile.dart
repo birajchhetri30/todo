@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todo/main.dart';
 import 'package:todo/login_format.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:todo/user_database.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -19,6 +20,13 @@ class Profile extends StatelessWidget {
         theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onError);
 
     var isEnabled = true;
+
+    String? newFname = Home.user?.fname;
+    String? newLname = Home.user?.lname;
+    String? newEmail = Home.user?.email;
+    String? newPassword = Home.user?.password;
+    bool changed = false; // to enable button if any textfield value changes
+    bool emailChanged = false;
 
     return Scaffold(
         body: NestedScrollView(
@@ -86,21 +94,68 @@ class Profile extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         createTextField(context, "First Name", user.fname, "",
-                            (value) => null, isEnabled, 170),
+                            (value) {
+                          newFname = value;
+                          if (newFname != Home.user?.fname) {
+                            changed = true;
+                          }
+                        }, isEnabled, 170),
                         createTextField(context, "Last Name", user.lname, "",
-                            (value) => null, isEnabled, 170)
+                            (value) {
+                          newLname = value;
+                          if (newLname != Home.user?.lname) {
+                            changed = true;
+                          }
+                        }, isEnabled, 170)
                       ],
                     ),
                     const SizedBox(height: 20),
-                    createTextField(context, "Email", user.email, "",
-                        (value) => null, isEnabled),
+                    createTextField(context, "Email", user.email, "", (value) {
+                      newEmail = value;
+                      if (newEmail != Home.user?.email) {
+                        changed = true;
+                        emailChanged = true;
+                      }
+                    }, isEnabled),
                     const SizedBox(height: 20),
                     createTextField(context, "Password", user.password, "",
-                        (value) => null, isEnabled),
+                        (value) {
+                      newPassword = value;
+                      if (newPassword != Home.user?.password) {
+                        changed = true;
+                      }
+                    }, isEnabled),
                     const SizedBox(height: 40),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        showDialog<void>(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (BuildContext context) {
+                              return createAlertDialog(
+                                  context: context,
+                                  mainButtonColor: theme.focusColor,
+                                  mainButtonText: "Proceed",
+                                  mainButtonOnPressed: () async {
+                                    bool success = await changeUserDetails(
+                                        id: user.id,
+                                        fname: newFname,
+                                        lname: newLname,
+                                        email: newEmail,
+                                        password: newPassword,
+                                        emailChanged: emailChanged);
+
+                                    if (success) {
+                                      Phoenix.rebirth(context);
+                                    } else {
+                                      // ADD validator here
+                                    }
+                                  },
+                                  content: Text(
+                                      "You will be logged out if you want to save changes.",
+                                      style: TextStyle(
+                                          color: theme.primaryColorLight)));
+                            });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.focusColor,
@@ -142,6 +197,32 @@ class Profile extends StatelessWidget {
                 ),
               ),
             )));
+  }
+
+  Future<bool> changeUserDetails(
+      {int? id,
+      String? fname,
+      String? lname,
+      String? email,
+      String? password,
+      bool? emailChanged}) async {
+    User user = User(
+        id: id!,
+        fname: fname!,
+        lname: lname!,
+        email: email!,
+        password: password!);
+
+    if (emailChanged!) {
+      int idExists = await UserDatabase.instance.conditionalUpdate(user);
+      if (idExists == -1) {
+        return false;
+      }
+      return true;
+    }
+
+    await UserDatabase.instance.update(user);
+    return true;
   }
 
   Widget createAlertDialog({
