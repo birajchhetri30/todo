@@ -155,42 +155,51 @@ class _ProfileState extends State<Profile> {
                     ElevatedButton(
                       onPressed: (changedValues.contains(true))
                           ? () {
-                              showDialog<void>(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  builder: (BuildContext context) {
-                                    return createAlertDialog(
-                                        context: context,
-                                        mainButtonColor: theme.focusColor,
-                                        mainButtonText: "Proceed",
-                                        mainButtonOnPressed: () async {
-                                          debugPrint('Email to be: $newEmail');
-                                          bool success =
-                                              await changeUserDetails(
-                                                  id: user.id,
-                                                  fname: newFname,
-                                                  lname: newLname,
-                                                  email: newEmail,
-                                                  password: newPassword,
-                                                  emailChanged: emailChanged);
+                              if (newFname == "" ||
+                                  newLname == "" ||
+                                  newEmail == "" ||
+                                  newPassword == "") {
+                                ResuableWidgets().createSnackBar(context,
+                                    content: "Please fill all the fields");
+                              } else {
+                                showDialog<void>(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (BuildContext context) {
+                                      return createAlertDialog(
+                                          context: context,
+                                          mainButtonColor: theme.focusColor,
+                                          mainButtonText: "Proceed",
+                                          mainButtonOnPressed: () async {
+                                            debugPrint(
+                                                'Email to be: $newEmail');
+                                            bool success =
+                                                await changeUserDetails(
+                                                    id: user.id,
+                                                    fname: newFname,
+                                                    lname: newLname,
+                                                    email: newEmail,
+                                                    password: newPassword,
+                                                    emailChanged: emailChanged);
 
-                                          if (success) {
-                                            Phoenix.rebirth(context);
-                                          } else {
-                                            Navigator.pop(context);
-                                            ResuableWidgets().createSnackBar(
-                                                context,
-                                                content:
-                                                    "Entered email already registered");
-                                            // ADD validator here
-                                          }
-                                        },
-                                        content: Text(
-                                            "You will be logged out if you want to save changes.",
-                                            style: TextStyle(
-                                                color:
-                                                    theme.primaryColorLight)));
-                                  });
+                                            if (success) {
+                                              Phoenix.rebirth(context);
+                                            } else {
+                                              Navigator.pop(context);
+                                              ResuableWidgets().createSnackBar(
+                                                  context,
+                                                  content:
+                                                      "Entered email already registered");
+                                              // ADD validator here
+                                            }
+                                          },
+                                          content: Text(
+                                              "You will be logged out if you want to save changes.",
+                                              style: TextStyle(
+                                                  color: theme
+                                                      .primaryColorLight)));
+                                    });
+                              }
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
