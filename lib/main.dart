@@ -21,7 +21,8 @@ class MyApp extends StatelessWidget {
         canvasColor: Colors.black,
         primaryColor: const Color.fromARGB(255, 127, 127, 127),
         primaryColorLight: Colors.white,
-        focusColor: const Color.fromARGB(255, 137, 99, 242));
+        focusColor: const Color.fromARGB(255, 137, 99, 242),
+        disabledColor: Color.fromARGB(255, 202, 202, 202));
 
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
@@ -470,5 +471,22 @@ class ResuableWidgets {
             ),
           );
         }).toList());
+  }
+
+  ScaffoldFeatureController createSnackBar(BuildContext context,
+      {required String content, bool isError = true}) {
+    var theme = Theme.of(context);
+
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+        content,
+        style: theme.textTheme.bodyLarge!
+            .copyWith(color: isError ? theme.colorScheme.onError : theme.focusColor),
+        textAlign: TextAlign.center,
+      ),
+      backgroundColor: theme.colorScheme.error,
+      duration: const Duration(seconds: 3),
+      elevation: 2,
+    ));
   }
 }
