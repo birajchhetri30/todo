@@ -5,13 +5,31 @@ import 'package:todo/login_format.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:todo/user_database.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   const Profile({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    User user = Home.user!;
+  State<Profile> createState() => _ProfileState();
+}
 
+class _ProfileState extends State<Profile> {
+  User user = Home.user!;
+
+  var changedValues = [
+    false,
+    false,
+    false,
+    false
+  ]; // fname, lname, email, password
+
+  String? newFname = Home.user?.fname;
+  String? newLname = Home.user?.lname;
+  String? newEmail = Home.user?.email;
+  String? newPassword = Home.user?.password;
+  bool emailChanged = false;
+
+  @override
+  Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var textStyle = theme.textTheme.headlineMedium!
         .copyWith(fontFamily: 'Raleway', color: theme.primaryColorLight);
@@ -21,13 +39,6 @@ class Profile extends StatelessWidget {
         theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onError);
 
     var isEnabled = true;
-
-    String? newFname = Home.user?.fname;
-    String? newLname = Home.user?.lname;
-    String? newEmail = Home.user?.email;
-    String? newPassword = Home.user?.password;
-    bool changed = false; // to enable button if any textfield value changes
-    bool emailChanged = false;
 
     return Scaffold(
         body: NestedScrollView(
@@ -93,74 +104,103 @@ class Profile extends StatelessWidget {
                   children: [
                     createTextField(context, "First Name", user.fname, "",
                         (value) {
-                      newFname = value;
-                      if (newFname != Home.user?.fname) {
-                        changed = true;
-                      }
+                      setState(() {
+                        newFname = value;
+                        if (newFname != Home.user?.fname) {
+                          changedValues[0] = true;
+                        } else {
+                          changedValues[0] = false;
+                        }
+                      });
                     }, isEnabled),
                     const SizedBox(height: 20),
                     createTextField(context, "Last Name", user.lname, "",
                         (value) {
-                      newLname = value;
-                      if (newLname != Home.user?.lname) {
-                        changed = true;
-                      }
+                      setState(() {
+                        newLname = value;
+                        if (newLname != Home.user?.lname) {
+                          changedValues[1] = true;
+                        } else {
+                          changedValues[1] = false;
+                        }
+                      });
                     }, isEnabled),
                     const SizedBox(height: 20),
                     createTextField(context, "Email", user.email, "", (value) {
-                      newEmail = value;
-                      if (newEmail != Home.user?.email) {
-                        changed = true;
-                        emailChanged = true;
-                      }
+                      setState(() {
+                        newEmail = value;
+                        debugPrint('Email $newEmail');
+                        if (newEmail != Home.user?.email) {
+                          changedValues[2] = true;
+                          emailChanged = true;
+                        } else {
+                          changedValues[2] = false;
+                          emailChanged = false;
+                        }
+                      });
                     }, isEnabled),
                     const SizedBox(height: 20),
                     createTextField(context, "Password", user.password, "",
                         (value) {
-                      newPassword = value;
-                      if (newPassword != Home.user?.password) {
-                        changed = true;
-                      }
+                      setState(() {
+                        newPassword = value;
+                        if (newPassword != Home.user?.password) {
+                          changedValues[3] = true;
+                        } else {
+                          changedValues[3] = false;
+                        }
+                      });
                     }, isEnabled),
                     const SizedBox(height: 40),
                     ElevatedButton(
-                      onPressed: () {
-                        showDialog<void>(
-                            context: context,
-                            barrierDismissible: true,
-                            builder: (BuildContext context) {
-                              return createAlertDialog(
+                      onPressed: (changedValues.contains(true))
+                          ? () {
+                              showDialog<void>(
                                   context: context,
-                                  mainButtonColor: theme.focusColor,
-                                  mainButtonText: "Proceed",
-                                  mainButtonOnPressed: () async {
-                                    bool success = await changeUserDetails(
-                                        id: user.id,
-                                        fname: newFname,
-                                        lname: newLname,
-                                        email: newEmail,
-                                        password: newPassword,
-                                        emailChanged: emailChanged);
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return createAlertDialog(
+                                        context: context,
+                                        mainButtonColor: theme.focusColor,
+                                        mainButtonText: "Proceed",
+                                        mainButtonOnPressed: () async {
+                                          debugPrint('Email to be: $newEmail');
+                                          bool success =
+                                              await changeUserDetails(
+                                                  id: user.id,
+                                                  fname: newFname,
+                                                  lname: newLname,
+                                                  email: newEmail,
+                                                  password: newPassword,
+                                                  emailChanged: emailChanged);
 
-                                    if (success) {
-                                      Phoenix.rebirth(context);
-                                    } else {
-                                      // ADD validator here
-                                    }
-                                  },
-                                  content: Text(
-                                      "You will be logged out if you want to save changes.",
-                                      style: TextStyle(
-                                          color: theme.primaryColorLight)));
-                            });
-                      },
+                                          if (success) {
+                                            Phoenix.rebirth(context);
+                                          } else {
+                                            Navigator.pop(context);
+                                            ResuableWidgets().createSnackBar(
+                                                context,
+                                                content:
+                                                    "Entered email already registered");
+                                            // ADD validator here
+                                          }
+                                        },
+                                        content: Text(
+                                            "You will be logged out if you want to save changes.",
+                                            style: TextStyle(
+                                                color:
+                                                    theme.primaryColorLight)));
+                                  });
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.focusColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        fixedSize: const Size(300, 50),
-                      ),
+                          backgroundColor: theme.focusColor,
+                          disabledBackgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(color: theme.focusColor),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          fixedSize: const Size(300, 50)),
                       child: Text("Save changes", style: buttonTextStyle),
                     ),
                     const SizedBox(height: 25),
@@ -212,6 +252,7 @@ class Profile extends StatelessWidget {
 
     if (emailChanged!) {
       int idExists = await UserDatabase.instance.conditionalUpdate(user);
+      debugPrint('Exists: $idExists');
       if (idExists == -1) {
         return false;
       }
@@ -253,7 +294,7 @@ class Profile extends StatelessWidget {
   }
 
   Widget createTextField(BuildContext context, String label, String text,
-      String hint, Function(String) onChanged, bool isEnabled,
+      String hint, void Function(String) onChanged, bool isEnabled,
       [double width = 300]) {
     var theme = Theme.of(context);
     var hintStyle =
