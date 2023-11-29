@@ -71,16 +71,24 @@ class Login extends StatelessWidget {
               onPressed: () async {
                 debugPrint(email);
                 debugPrint(password);
-                User? user;
-                bool success = false;
-                (user, success) =
-                    await LoginControl().loginUser(email, password);
-                if (success) {
-                  Home.user = user!;
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Home()),
-                      (route) => false);
+                if (email.isEmpty || password.isEmpty) {
+                  ResuableWidgets().createSnackBar(context,
+                      content: "Please fill all the fields");
+                } else {
+                  User? user;
+                  bool success = false;
+                  (user, success) =
+                      await LoginControl().loginUser(email, password);
+                  if (success) {
+                    Home.user = user!;
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Home()),
+                        (route) => false);
+                  } else {
+                    ResuableWidgets().createSnackBar(context,
+                        content: "Incorrect email/password");
+                  }
                 }
               },
               child: Text("Login", style: textStyle)),
@@ -172,19 +180,30 @@ class SignUp extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(10))),
                     fixedSize: const Size(300, 50)),
                 onPressed: () async {
-                  User? user = User(
-                      fname: fname,
-                      lname: lname,
-                      email: email,
-                      password: password);
-                  bool success = false;
-                  (user, success) = await LoginControl().addUser(user);
-                  if (success) {
-                    Home.user = user!;
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Home()),
-                        (route) => false);
+                  if (fname.isEmpty ||
+                      lname.isEmpty ||
+                      email.isEmpty ||
+                      password.isEmpty) {
+                    ResuableWidgets().createSnackBar(context,
+                        content: "Please fill all the fields");
+                  } else {
+                    User? user = User(
+                        fname: fname,
+                        lname: lname,
+                        email: email,
+                        password: password);
+                    bool success = false;
+                    (user, success) = await LoginControl().addUser(user);
+                    if (success) {
+                      Home.user = user!;
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Home()),
+                          (route) => false);
+                    } else {
+                      ResuableWidgets().createSnackBar(context,
+                          content: "Entered email already registered");
+                    }
                   }
                 },
                 child: Text("Create account", style: textStyle)),
